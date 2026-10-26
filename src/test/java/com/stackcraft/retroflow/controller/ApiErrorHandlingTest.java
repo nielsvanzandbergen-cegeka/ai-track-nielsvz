@@ -44,6 +44,33 @@ class ApiErrorHandlingTest extends ControllerTestSupport {
     }
 
     @Test
+    void addFeedbackItem_whenUnexpectedFailureOccurs_returnsSanitizedServerError() throws Exception {
+        // Arrange
+        when(retrospectives.addFeedbackItem(anyLong(), anyString(), anyString(), anyString()))
+            .thenThrow(new IllegalStateException("org.hibernate internals"));
+        var body = "{\"content\":\"Fast reviews\",\"type\":\"WENT_WELL\",\"submittedBy\":\"Alice\"}";
+
+        // Act & Assert
+        mvc.perform(post("/api/retrospectives/{id}/feedback", RETRO_ID)
+                .contentType(MediaType.APPLICATION_JSON).content(body))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.error").value("Request: an unexpected server error occurred"))
+            .andExpect(jsonPath("$.trace").doesNotExist());
+    }
+
+    @Test
+    void completeActionItem_whenUnexpectedFailureOccurs_returnsSanitizedServerError() throws Exception {
+        // Arrange
+        doThrow(new IllegalStateException("org.hibernate internals")).when(retrospectives).completeActionItem(anyLong());
+
+        // Act & Assert
+        mvc.perform(put("/api/action-items/{id}/complete", 1L))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.error").value("Request: an unexpected server error occurred"))
+            .andExpect(jsonPath("$.status").value(500));
+    }
+
+    @Test
     void request_whenMethodIsUnsupported_preservesMethodNotAllowed() throws Exception {
         // Arrange
         var request = delete("/api/teams/{id}", TEAM_ID);

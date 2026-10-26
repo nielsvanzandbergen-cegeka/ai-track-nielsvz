@@ -4,7 +4,7 @@ import com.stackcraft.retroflow.dto.CreateRetrospectiveRequest;
 import com.stackcraft.retroflow.dto.RetrospectiveResponse;
 import com.stackcraft.retroflow.service.RetrospectiveService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -23,7 +23,7 @@ public class RetrospectiveController {
 
     @PostMapping("/teams/{teamId}/retrospectives")
     public ResponseEntity<RetrospectiveResponse> createRetrospective(
-            @PathVariable @Positive(message = "must be greater than zero") Long teamId,
+            @PathVariable @NotNull Long teamId,
             @Valid @RequestBody CreateRetrospectiveRequest request) {
         var retro = retrospectiveService.createRetrospective(teamId, request.title(), request.date());
         var location = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -33,14 +33,14 @@ public class RetrospectiveController {
 
     @GetMapping("/teams/{teamId}/retrospectives")
     public List<RetrospectiveResponse> listRetrospectives(
-            @PathVariable @Positive(message = "must be greater than zero") Long teamId) {
+            @PathVariable @NotNull Long teamId) {
         return retrospectiveService.listRetrospectives(teamId).stream()
             .map(RetrospectiveResponse::from).toList();
     }
 
     @PutMapping("/retrospectives/{id}/close")
     public ResponseEntity<Void> closeRetrospective(
-            @PathVariable @Positive(message = "must be greater than zero") Long id) {
+            @PathVariable @NotNull Long id) {
         retrospectiveService.closeRetrospective(id);
         return ResponseEntity.noContent().build();
     }

@@ -101,8 +101,8 @@ class TeamControllerTest extends ControllerTestSupport {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"0", "-1", "not-a-number", "999999999999999999999999"})
-    void getTeam_whenIdIsInvalid_returnsBadRequestBeforeService(String id) throws Exception {
+    @ValueSource(strings = {"not-a-number", "999999999999999999999999"})
+    void getTeam_whenIdIsMalformed_returnsBadRequestBeforeService(String id) throws Exception {
         // Arrange
         var request = get("/api/teams/{id}", id);
 
@@ -110,5 +110,18 @@ class TeamControllerTest extends ControllerTestSupport {
         mvc.perform(request).andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.error").value(containsString("id")));
         verifyNoInteractions(teams, retrospectives);
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {0L, -1L})
+    void getTeam_whenIdIsZeroOrNegative_returnsNotFoundFromService(long id) throws Exception {
+        // Arrange
+        when(teams.getTeam(id)).thenThrow(new ResourceNotFoundException("Team", id));
+
+        // Act & Assert
+        mvc.perform(get("/api/teams/{id}", id))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.error").value("Team " + id + ": not found"));
+        verify(teams).getTeam(id);
     }
 }
