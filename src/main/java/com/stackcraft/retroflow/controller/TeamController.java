@@ -4,7 +4,7 @@ import com.stackcraft.retroflow.dto.CreateTeamRequest;
 import com.stackcraft.retroflow.dto.TeamResponse;
 import com.stackcraft.retroflow.service.TeamService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -28,7 +28,7 @@ public class TeamController {
     }
 
     @GetMapping("/{id}")
-    public TeamResponse getTeam(@PathVariable @Positive(message = "must be greater than zero") Long id) {
+    public TeamResponse getTeam(@PathVariable @NotNull Long id) {
         return TeamResponse.from(teamService.getTeam(id));
     }
 }

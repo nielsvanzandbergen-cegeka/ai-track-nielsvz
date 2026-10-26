@@ -14,7 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.util.List;
 
-@WebMvcTest({TeamController.class, RetrospectiveController.class})
+@WebMvcTest({TeamController.class, RetrospectiveController.class,
+    FeedbackController.class, ActionItemController.class})
 @Import(ApiJsonConfiguration.class)
 @MockBean({TeamService.class, RetrospectiveService.class})
 abstract class ControllerTestSupport {

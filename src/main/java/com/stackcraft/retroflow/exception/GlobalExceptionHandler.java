@@ -4,8 +4,10 @@ import com.stackcraft.retroflow.dto.ApiError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -52,10 +54,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         }
         var message = exception.getAllValidationResults().stream()
             .flatMap(result -> result.getResolvableErrors().stream()
-                .map(validation -> result.getMethodParameter().getParameterName() + ": "
+                .map(validation -> fieldName(validation, result.getMethodParameter().getParameterName()) + ": "
                     + validation.getDefaultMessage()))
             .sorted().collect(Collectors.joining("; "));
         return error("Request " + message, HttpStatus.BAD_REQUEST, headers);
+    }
+
+    private static String fieldName(MessageSourceResolvable validation, String parameterName) {
+        return validation instanceof FieldError field ? field.getField() : parameterName;
     }
 
     @Override

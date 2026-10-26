@@ -140,8 +140,8 @@ class RetrospectiveControllerTest extends ControllerTestSupport {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"0", "-1", "not-a-number", "999999999999999999999999"})
-    void retrospectiveEndpoints_whenIdIsInvalid_returnBadRequestBeforeService(String id) throws Exception {
+    @ValueSource(strings = {"not-a-number", "999999999999999999999999"})
+    void retrospectiveEndpoints_whenIdIsMalformed_returnBadRequestBeforeService(String id) throws Exception {
         // Arrange
         var create = post("/api/teams/{teamId}/retrospectives", id)
             .contentType(MediaType.APPLICATION_JSON).content(RETRO_JSON);
@@ -153,6 +153,23 @@ class RetrospectiveControllerTest extends ControllerTestSupport {
         mvc.perform(list).andExpect(status().isBadRequest());
         mvc.perform(close).andExpect(status().isBadRequest());
         verifyNoInteractions(teams, retrospectives);
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {0L, -1L})
+    void retrospectiveEndpoints_whenIdIsZeroOrNegative_returnNotFoundFromService(long id) throws Exception {
+        // Arrange
+        when(retrospectives.createRetrospective(id, "Sprint retro", MEETING_DATE))
+            .thenThrow(new ResourceNotFoundException("Team", id));
+        when(retrospectives.listRetrospectives(id)).thenThrow(new ResourceNotFoundException("Team", id));
+        doThrow(new ResourceNotFoundException("Retrospective", id)).when(retrospectives).closeRetrospective(id);
+        var create = post("/api/teams/{teamId}/retrospectives", id)
+            .contentType(MediaType.APPLICATION_JSON).content(RETRO_JSON);
+
+        // Act & Assert
+        mvc.perform(create).andExpect(status().isNotFound());
+        mvc.perform(get("/api/teams/{teamId}/retrospectives", id)).andExpect(status().isNotFound());
+        mvc.perform(put("/api/retrospectives/{id}/close", id)).andExpect(status().isNotFound());
     }
 
     @Test
