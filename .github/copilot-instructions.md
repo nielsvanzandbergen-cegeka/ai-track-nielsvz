@@ -1,0 +1,18 @@
+- Use Java 21, Spring Boot 3.3.4, Maven, Spring Data JPA, and in-memory H2.
+- Use `jakarta.*` annotations, explicit Java code, and records for DTOs, not entities.
+- Follow the brief and `decisions.md`; flag unresolved requirements rather than inventing rules.
+- Preserve existing packages until migration is agreed; use feature-first organization for new features.
+- Use constructor injection only, descriptive names, and small, focused methods.
+- Keep classes within 200 lines and methods within 20 nonblank, noncomment lines.
+- Keep controllers thin; validate request DTOs at the boundary and enforce business rules in services.
+- Return DTOs, not JPA entities; use parameterized queries and transactional safeguards for concurrent mutations.
+- Format service exceptions as `EntityType identifier: reason`; never return null for expected failures.
+- Handle errors centrally with `error`, `status`, and `timestamp`; never expose internal details.
+- Use HTTP 201 for creation, 200 for reads, 200/204 for updates, 204 for deletion, 400 for validation, 404 for missing resources, and 409 for business conflicts.
+- Test happy paths, invalid inputs, lifecycle restrictions, and relevant concurrency cases.
+- Name tests `methodName_condition_expectedBehaviour`; use explicit Arrange-Act-Assert comments and named test data.
+- Target at least 80% line coverage and 70% branch coverage.
+- Before declaring completion, run `mvn test`; fix regressions and disclose any remaining failures or blockers.
+- Never weaken, skip, disable, or delete tests to make the build pass.
+- Never use Lombok, field injection, swallowed exceptions, success-shaped stub responses, or hard-coded secrets.
+- Never overwrite unrelated changes, expand scope silently, or claim stubbed business logic is implemented.
